@@ -2,34 +2,146 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Matrix Phrase Game - Test</title>
+  <title>Matrix Phrase Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin:0; padding:0; background:black; color:#99ff99; font-family:monospace; overflow:hidden; }
-    body.error { animation:shake 0.4s; }
-    @keyframes shake {
-      0%{transform:translateX(0px);}25%{transform:translateX(-10px);}
-      50%{transform:translateX(10px);}75%{transform:translateX(-10px);}
-      100%{transform:translateX(0px);}
+    body {
+      margin: 0;
+      padding: 0;
+      background: black;
+      color: #99ff99;
+      font-family: monospace;
+      overflow: hidden;
     }
-    #matrixCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; }
-    #intro,#game { display:none; text-align:center; padding:20px; max-width:600px; margin:auto; z-index:1; position:relative;}
-    #intro.active,#game.active { display:block; }
-    h1 { margin-bottom:20px; font-size:1.8rem; }
-    #phrase { font-size:1.6rem; letter-spacing:0.2rem; margin:20px auto; text-align:center; max-width:95%; white-space:pre-line; }
-    #phrase.glow { text-shadow:0 0 10px #00ff00,0 0 20px #00ff00; }
-    .codes{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:20px;width:100%;}
-    .code-slot{display:flex;flex-direction:column;align-items:center;width:100%;}
-    .code-slot label{margin-bottom:5px;}
-    .code-slot input{padding:10px;font-size:1rem;border:1px solid #00ff00;background:black;color:#00ff00;width:90%;max-width:300px;text-align:center;border-radius:4px;}
-    button{margin:10px;padding:10px 20px;font-size:1rem;background:#00ff00;border:none;color:black;cursor:pointer;border-radius:4px;}
-    button:hover{background:#00cc00;}
-    #message{margin-top:10px;font-size:1rem;color:#ff6666;}
-    #crashOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:black;z-index:50;display:flex;align-items:center;justify-content:center;color:#00ff00;font-size:2rem;font-weight:bold;text-align:center;}
-    #revealContainer{margin-top:20px;text-align:center;}
-    .reveal-slot{margin:10px;}
-    .reveal-slot input{padding:10px;font-size:1rem;border:1px solid #00ff00;background:black;color:#00ff00;width:150px;text-align:center;border-radius:4px;}
-    @media(max-width:600px){h1{font-size:1.5rem;}#phrase{font-size:1.3rem;}#crashOverlay{font-size:1.4rem;}}
+    body.error {
+      animation: shake 0.4s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0px); }
+    }
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    #intro, #game {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      z-index: 1;
+      position: relative;
+    }
+    #intro.active, #game.active {
+      display: block;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 1.8rem;
+    }
+    #phrase {
+      font-size: 1.6rem;
+      letter-spacing: 0.2rem;
+      margin: 20px auto;
+      text-align: center;
+      max-width: 95%;
+      word-wrap: break-word;
+      white-space: pre-line;
+      transition: text-shadow 0.5s;
+    }
+    #phrase.glow {
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
+    }
+    .codes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .code-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    .code-slot label {
+      margin-bottom: 5px;
+    }
+    .code-slot input {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #00ff00;
+      background: black;
+      color: #00ff00;
+      width: 90%;
+      max-width: 300px;
+      text-align: center;
+      border-radius: 4px;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #00ff00;
+      border: none;
+      color: black;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    button:hover {
+      background: #00cc00;
+    }
+    #message {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #ff6666;
+    }
+    #crashOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: black;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #00ff00;
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+    }
+    #revealContainer {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .reveal-slot {
+      margin: 10px;
+    }
+    .reveal-slot input {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #00ff00;
+      background: black;
+      color: #00ff00;
+      width: 150px;
+      text-align: center;
+      border-radius: 4px;
+    }
+    @media (max-width: 600px) {
+      h1 { font-size: 1.5rem; }
+      #phrase { font-size: 1.3rem; }
+      #crashOverlay { font-size: 1.4rem; }
+    }
   </style>
 </head>
 <body>
@@ -39,7 +151,9 @@
   <div id="intro" class="active">
     <h1>Matrix Phrase Challenge</h1>
     <p>
-      Every cocktail (Red or Blue Pill) you consume earns you a binary code.<br><br>
+      You are entering the Matrix.<br><br>
+      Every cocktail (Red or Blue Pill) you consume<br>
+      earns you a binary code.<br><br>
       There are 4 unique codes.<br>
       Enter them to reveal the hidden phrase.<br><br>
       With 1 code, it’s nearly impossible.<br>
@@ -56,7 +170,7 @@
   <!-- Game Screen -->
   <div id="game">
     <h1>Decode the Phrase</h1>
-    <div id="phrase">_____ ___ _________ ______</div>
+    <div id="phrase">_______ __ ___ ______ __ ___ ____</div>
     
     <div class="codes">
       <div class="code-slot"><label>Code 1</label><input type="text" id="code1" placeholder="Enter code"></div>
@@ -70,61 +184,154 @@
   </div>
 
   <script>
-    // Matrix Rain
-    const canvas=document.getElementById("matrixCanvas"),ctx=canvas.getContext("2d");
-    canvas.height=window.innerHeight;canvas.width=window.innerWidth;
-    const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*",fontSize=14,columns=canvas.width/fontSize,drops=[];
-    for(let x=0;x<columns;x++)drops[x]=1;
-    function drawMatrix(){ctx.fillStyle="rgba(0,0,0,0.08)";ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle="rgba(0,255,0,0.4)";ctx.font=fontSize+"px monospace";
-      for(let i=0;i<drops.length;i++){const text=letters.charAt(Math.floor(Math.random()*letters.length));ctx.fillText(text,i*fontSize,drops[i]*fontSize);
-        if(drops[i]*fontSize>canvas.height&&Math.random()>0.975)drops[i]=0;drops[i]++;}}
-    setInterval(drawMatrix,33);
+    // --- Matrix Rain Effect ---
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+    for (let x = 0; x < columns; x++) drops[x] = 1;
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(0,255,0,0.4)";
+      ctx.font = fontSize + "px monospace";
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 33);
 
-    // Game Logic
-    const phrase="HAPPY 30TH BIRTHDAY TYLER";
-    const codes={"1k001b0110":["H","A"],"2p101q0011":["P","Y"],"3m111n0101":["B","D"],"4s100t1110":["T","R"]};
-    let unlockedLetters=[],usedCodes=[];
+    // --- Game Logic ---
+    const phrase = "WELCOME TO THE DESERT OF THE REAL";
+    const codes = {
+      "1b001a0110": ["W","O"],
+      "2x101e0011": ["T","A"],
+      "3q111z0101": ["D","R"],
+      "4m100n1110": ["S","E"]
+    };
+    let unlockedLetters = [];
+    let usedCodes = [];
 
-    function renderPhrase(animated=false){
-      let display="";for(let char of phrase){if(char===" ")display+=" ";else if(unlockedLetters.includes(char))display+=char;else display+="_";}
-      const div=document.getElementById("phrase");
-      if(animated){const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";let scramble=display.split(""),i=0;
-        const interval=setInterval(()=>{scramble=scramble.map((c,idx)=>{if(display[idx]!=="_"&&idx<=i)return display[idx];return chars.charAt(Math.floor(Math.random()*chars.length));});
-          div.textContent=scramble.join("");i++;if(i>display.length){clearInterval(interval);div.textContent=display;div.classList.add("glow");setTimeout(()=>div.classList.remove("glow"),600);}},30);}
-      else div.textContent=display;
+    function renderPhrase(animated=false) {
+      let display = "";
+      for (let char of phrase) {
+        if (char === " ") display += " ";
+        else if (unlockedLetters.includes(char)) display += char;
+        else display += "_";
+      }
+      const phraseDiv = document.getElementById("phrase");
+      if (animated) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
+        let scramble = display.split("");
+        let i = 0;
+        const interval = setInterval(() => {
+          scramble = scramble.map((c, idx) => {
+            if (display[idx] !== "_" && idx <= i) return display[idx];
+            return chars.charAt(Math.floor(Math.random() * chars.length));
+          });
+          phraseDiv.textContent = scramble.join("");
+          i++;
+          if (i > display.length) {
+            clearInterval(interval);
+            phraseDiv.textContent = display;
+            phraseDiv.classList.add("glow");
+            setTimeout(() => phraseDiv.classList.remove("glow"), 600);
+          }
+        }, 30);
+      } else {
+        phraseDiv.textContent = display;
+      }
     }
 
-    function triggerError(id){document.body.classList.add("error");setTimeout(()=>document.body.classList.remove("error"),500);document.getElementById(id).value="";}
-
-    function triggerFinale(){
-      const overlay=document.createElement("div");overlay.id="crashOverlay";document.body.appendChild(overlay);
-      let i=0,colors=["rgba(0,255,0,0.8)","rgba(255,0,0,0.8)"];const flash=setInterval(()=>{overlay.style.background=colors[i%2];i++;},150);
-      setTimeout(()=>{overlay.innerHTML="<h1>YOU'VE BREACHED THE MATRIX<br>GIVE YOUR FINAL PHRASE TO TIM</h1>";},2000);
-      setTimeout(()=>{clearInterval(flash);overlay.remove();const h=document.createElement("h2");h.textContent="GIVE YOUR FINAL PHRASE TO TIM";document.getElementById("game").prepend(h);showLetterRevealBoxes();},5000);
+    function triggerError(inputId) {
+      document.body.classList.add("error");
+      setTimeout(() => document.body.classList.remove("error"), 500);
+      document.getElementById(inputId).value = "";
     }
 
-    function showLetterRevealBoxes(){
-      const c=document.createElement("div");c.id="revealContainer";c.innerHTML=`
+    function triggerFinale() {
+      const overlay = document.createElement("div");
+      overlay.id = "crashOverlay";
+      document.body.appendChild(overlay);
+
+      let i = 0;
+      const colors = ["rgba(0,255,0,0.8)", "rgba(255,0,0,0.8)"];
+      const flashInterval = setInterval(() => {
+        overlay.style.background = colors[i % 2];
+        i++;
+      }, 150);
+
+      setTimeout(() => {
+        overlay.innerHTML = "<h1>YOU'VE BREACHED THE MATRIX<br>GIVE YOUR FINAL PHRASE TO TIM</h1>";
+      }, 2000);
+
+      setTimeout(() => {
+        clearInterval(flashInterval);
+        overlay.remove();
+        const header = document.createElement("h2");
+        header.textContent = "GIVE YOUR FINAL PHRASE TO TIM";
+        document.getElementById("game").prepend(header);
+        showLetterRevealBoxes();
+      }, 5000); // full 5s crash
+    }
+
+    function showLetterRevealBoxes() {
+      const container = document.createElement("div");
+      container.id = "revealContainer";
+      container.innerHTML = `
         <p>Still stuck? You get 3 chances to reveal letters</p>
         <div class="reveal-slot"><input maxlength="1" placeholder="Enter a letter" id="reveal1"><button onclick="guessLetter('reveal1')">Guess</button></div>
         <div class="reveal-slot"><input maxlength="1" placeholder="Enter a letter" id="reveal2"><button onclick="guessLetter('reveal2')">Guess</button></div>
-        <div class="reveal-slot"><input maxlength="1" placeholder="Enter a letter" id="reveal3"><button onclick="guessLetter('reveal3')">Guess</button></div>`;
-      document.getElementById("game").appendChild(c);
+        <div class="reveal-slot"><input maxlength="1" placeholder="Enter a letter" id="reveal3"><button onclick="guessLetter('reveal3')">Guess</button></div>
+      `;
+      document.getElementById("game").appendChild(container);
     }
 
-    function guessLetter(id){const inp=document.getElementById(id),l=inp.value.toUpperCase();if(phrase.includes(l)){unlockedLetters.push(l);renderPhrase(true);}inp.disabled=true;inp.nextElementSibling.disabled=true;}
-
-    function submitCodes(){
-      const msg=document.getElementById("message");msg.textContent="";
-      for(let i=1;i<=4;i++){const id="code"+i,inp=document.getElementById(id).value.trim();
-        if(inp&&codes[inp]&&inp.startsWith(i.toString())&&!usedCodes.includes(inp)){unlockedLetters=[...new Set(unlockedLetters.concat(codes[inp]))];usedCodes.push(inp);renderPhrase(true);msg.textContent="Code "+i+" accepted!";if(usedCodes.length===4)triggerFinale();}
-        else if(inp&&usedCodes.includes(inp)){msg.textContent="Code "+i+" already used.";}
-        else if(inp){triggerError(id);}}
+    function guessLetter(inputId) {
+      const input = document.getElementById(inputId);
+      const letter = input.value.toUpperCase();
+      if (phrase.includes(letter)) {
+        unlockedLetters.push(letter);
+        renderPhrase(true);
+      }
+      input.disabled = true;
+      input.nextElementSibling.disabled = true;
     }
 
-    function startGame(){document.getElementById("intro").classList.remove("active");document.getElementById("game").classList.add("active");renderPhrase();}
+    function submitCodes() {
+      const msg = document.getElementById("message");
+      msg.textContent = "";
+      for (let i = 1; i <= 4; i++) {
+        const inputId = "code" + i;
+        const input = document.getElementById(inputId).value.trim();
+        if (input && codes[input] && input.startsWith(i.toString()) && !usedCodes.includes(input)) {
+          unlockedLetters = [...new Set(unlockedLetters.concat(codes[input]))];
+          usedCodes.push(input);
+          renderPhrase(true);
+          msg.textContent = "Code " + i + " accepted!";
+          if (usedCodes.length === 4) triggerFinale();
+        } else if (input && usedCodes.includes(input)) {
+          msg.textContent = "Code " + i + " already used.";
+        } else if (input) {
+          triggerError(inputId);
+        }
+      }
+    }
+
+    function startGame() {
+      document.getElementById("intro").classList.remove("active");
+      document.getElementById("game").classList.add("active");
+      renderPhrase();
+    }
+
     renderPhrase();
   </script>
 </body>
 </html>
-

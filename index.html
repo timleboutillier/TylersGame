@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Matrix Phrase Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       margin: 0;
       padding: 0;
       background: black;
-      color: #00ff00;
+      color: #99ff99;
       font-family: monospace;
       overflow: hidden;
     }
@@ -23,52 +24,63 @@
     #intro, #game {
       display: none;
       text-align: center;
-      padding-top: 50px;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
     }
     #intro.active, #game.active {
       display: block;
     }
     h1 {
       margin-bottom: 20px;
+      font-size: 1.8rem;
     }
     #phrase {
-      font-size: 2rem;
+      font-size: 1.6rem;
       letter-spacing: 0.2rem;
       margin: 20px auto;
       text-align: center;
-      max-width: 90%;
+      max-width: 95%;
       word-wrap: break-word;
       white-space: pre-line;
     }
     .codes {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
+      align-items: center;
       gap: 10px;
       margin-top: 20px;
+      width: 100%;
     }
     .code-slot {
       display: flex;
       flex-direction: column;
       align-items: center;
+      width: 100%;
+    }
+    .code-slot label {
+      margin-bottom: 5px;
     }
     .code-slot input {
-      margin: 5px;
       padding: 10px;
       font-size: 1rem;
       border: 1px solid #00ff00;
       background: black;
       color: #00ff00;
-      width: 140px;
+      width: 90%;
+      max-width: 300px;
       text-align: center;
+      border-radius: 4px;
     }
     button {
       margin: 20px;
-      padding: 10px 20px;
+      padding: 12px 24px;
       font-size: 1rem;
       background: #00ff00;
       border: none;
       color: black;
       cursor: pointer;
+      border-radius: 4px;
     }
     button:hover {
       background: #00cc00;
@@ -76,7 +88,12 @@
     #message {
       margin-top: 10px;
       font-size: 1rem;
-      color: #ff3333;
+      color: #ff6666;
+    }
+    /* Responsive text */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.5rem; }
+      #phrase { font-size: 1.3rem; }
     }
   </style>
 </head>
@@ -96,7 +113,9 @@
       With 2 codes, still very difficult.<br>
       With 3 codes, a sharp mind may crack it.<br>
       With 4 codes, you stand a chance.<br><br>
-      Trade codes. Decode the truth.
+      You may receive duplicate codes...<br>
+      Trade with your competitors.<br>
+      Decode the truth.
     </p>
     <button onclick="startGame()">Enter the Game</button>
   </div>
@@ -130,7 +149,7 @@
   </div>
 
   <script>
-    // --- Falling Matrix Effect ---
+    // --- Matrix Rain Effect ---
     const canvas = document.getElementById("matrixCanvas");
     const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
@@ -146,9 +165,9 @@
     }
 
     function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)"; // dimmer background
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#0F0";
+      ctx.fillStyle = "rgba(0,255,0,0.4)"; // dim green
       ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
@@ -194,7 +213,7 @@
           phraseDiv.textContent = display.substring(0, i) + "_".repeat(display.length - i);
           i++;
           if (i > display.length) clearInterval(interval);
-        }, 30);
+        }, 25);
       } else {
         phraseDiv.textContent = display;
       }

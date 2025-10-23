@@ -12,11 +12,8 @@
       color: #99ff99;
       font-family: monospace;
       overflow: hidden;
-      transition: background 0.3s;
     }
     body.error {
-      background: #330000;
-      color: #ff3333;
       animation: shake 0.4s;
     }
     @keyframes shake {
@@ -40,6 +37,8 @@
       padding: 20px;
       max-width: 600px;
       margin: auto;
+      z-index: 1;
+      position: relative;
     }
     #intro.active, #game.active {
       display: block;
@@ -107,20 +106,19 @@
       font-size: 1rem;
       color: #ff6666;
     }
-    #finalOverlay {
+    #crashOverlay {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
+      background: black;
+      z-index: 50;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(0,0,0,0.9);
-      z-index: 20;
-      text-align: center;
       color: #00ff00;
       font-size: 2rem;
       font-weight: bold;
+      text-align: center;
     }
     #revealContainer {
       margin-top: 20px;
@@ -142,7 +140,7 @@
     @media (max-width: 600px) {
       h1 { font-size: 1.5rem; }
       #phrase { font-size: 1.3rem; }
-      #finalOverlay { font-size: 1.4rem; }
+      #crashOverlay { font-size: 1.4rem; }
     }
   </style>
 </head>
@@ -175,22 +173,10 @@
     <div id="phrase">_______ __ ___ ______ __ ___ ____</div>
     
     <div class="codes">
-      <div class="code-slot">
-        <label>Code 1</label>
-        <input type="text" id="code1" placeholder="Enter code">
-      </div>
-      <div class="code-slot">
-        <label>Code 2</label>
-        <input type="text" id="code2" placeholder="Enter code">
-      </div>
-      <div class="code-slot">
-        <label>Code 3</label>
-        <input type="text" id="code3" placeholder="Enter code">
-      </div>
-      <div class="code-slot">
-        <label>Code 4</label>
-        <input type="text" id="code4" placeholder="Enter code">
-      </div>
+      <div class="code-slot"><label>Code 1</label><input type="text" id="code1" placeholder="Enter code"></div>
+      <div class="code-slot"><label>Code 2</label><input type="text" id="code2" placeholder="Enter code"></div>
+      <div class="code-slot"><label>Code 3</label><input type="text" id="code3" placeholder="Enter code"></div>
+      <div class="code-slot"><label>Code 4</label><input type="text" id="code4" placeholder="Enter code"></div>
     </div>
     
     <button onclick="submitCodes()">Submit Codes</button>
@@ -203,13 +189,11 @@
     const ctx = canvas.getContext("2d");
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
-
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops = [];
     for (let x = 0; x < columns; x++) drops[x] = 1;
-
     function drawMatrix() {
       ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -243,27 +227,46 @@
         else display += "_";
       }
       const phraseDiv = document.getElementById("phrase");
-      phraseDiv.textContent = display;
+      if (animated) {
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
+        let scramble = display.split("");
+        let i = 0;
+        const interval = setInterval(() => {
+          scramble = scramble.map((c, idx) => {
+            if (display[idx] !== "_" && idx <= i) return display[idx];
+            return chars.charAt(Math.floor(Math.random() * chars.length));
+          });
+          phraseDiv.textContent = scramble.join("");
+          i++;
+          if (i > display.length) {
+            clearInterval(interval);
+            phraseDiv.textContent = display;
+            phraseDiv.classList.add("glow");
+            setTimeout(() => phraseDiv.classList.remove("glow"), 600);
+          }
+        }, 30);
+      } else {
+        phraseDiv.textContent = display;
+      }
     }
 
     function triggerError(inputId) {
       document.body.classList.add("error");
-      setTimeout(() => { document.body.classList.remove("error"); }, 500);
+      setTimeout(() => document.body.classList.remove("error"), 500);
       document.getElementById(inputId).value = "";
     }
 
     function triggerFinale() {
       const overlay = document.createElement("div");
-      overlay.id = "finalOverlay";
+      overlay.id = "crashOverlay";
       document.body.appendChild(overlay);
 
       let i = 0;
-      const colors = ["#0f0", "#f00"];
+      const colors = ["rgba(0,255,0,0.8)", "rgba(255,0,0,0.8)"];
       const flashInterval = setInterval(() => {
-        document.body.style.background = colors[i % 2];
-        overlay.innerHTML = "";
+        overlay.style.background = colors[i % 2];
         i++;
-      }, 200);
+      }, 150);
 
       setTimeout(() => {
         overlay.innerHTML = "<h1>YOU'VE BREACHED THE MATRIX<br>GIVE YOUR FINAL PHRASE TO TIM</h1>";
@@ -271,13 +274,12 @@
 
       setTimeout(() => {
         clearInterval(flashInterval);
-        document.body.style.background = "black";
         overlay.remove();
         const header = document.createElement("h2");
         header.textContent = "GIVE YOUR FINAL PHRASE TO TIM";
         document.getElementById("game").prepend(header);
         showLetterRevealBoxes();
-      }, 7000);
+      }, 5000); // full 5s crash
     }
 
     function showLetterRevealBoxes() {
@@ -297,7 +299,7 @@
       const letter = input.value.toUpperCase();
       if (phrase.includes(letter)) {
         unlockedLetters.push(letter);
-        renderPhrase();
+        renderPhrase(true);
       }
       input.disabled = true;
       input.nextElementSibling.disabled = true;
@@ -312,7 +314,7 @@
         if (input && codes[input] && input.startsWith(i.toString()) && !usedCodes.includes(input)) {
           unlockedLetters = [...new Set(unlockedLetters.concat(codes[input]))];
           usedCodes.push(input);
-          renderPhrase();
+          renderPhrase(true);
           msg.textContent = "Code " + i + " accepted!";
           if (usedCodes.length === 4) triggerFinale();
         } else if (input && usedCodes.includes(input)) {
@@ -329,7 +331,6 @@
       renderPhrase();
     }
 
-    // Init phrase
     renderPhrase();
   </script>
 </body>

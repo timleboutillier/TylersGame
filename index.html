@@ -12,6 +12,19 @@
       color: #99ff99;
       font-family: monospace;
       overflow: hidden;
+      transition: background 0.3s;
+    }
+    body.error {
+      background: #330000;
+      color: #ff3333;
+      animation: shake 0.4s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0px); }
+      25% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+      75% { transform: translateX(-10px); }
+      100% { transform: translateX(0px); }
     }
     #matrixCanvas {
       position: fixed;
@@ -165,9 +178,9 @@
     }
 
     function drawMatrix() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.08)"; // dimmer background
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "rgba(0,255,0,0.4)"; // dim green
+      ctx.fillStyle = "rgba(0,255,0,0.4)";
       ctx.font = fontSize + "px monospace";
 
       for (let i = 0; i < drops.length; i++) {
@@ -184,11 +197,13 @@
 
     // --- Game Logic ---
     const phrase = "WELCOME TO THE DESERT OF THE REAL";
+
+    // 2 letters per code, codes start with slot number
     const codes = {
-      "100110101": ["W","O"], // Code 1
-      "101001011": ["T","A"], // Code 2
-      "111000111": ["D","R"], // Code 3
-      "110011001": ["S","E"]  // Code 4
+      "10010110": ["W","O"], // Code 1
+      "20011100": ["T","A"], // Code 2
+      "30101001": ["D","R"], // Code 3
+      "40110111": ["S","E"]  // Code 4
     };
     let unlockedLetters = [];
     let usedCodes = [];
@@ -219,21 +234,31 @@
       }
     }
 
+    function triggerError(inputId) {
+      document.body.classList.add("error");
+      setTimeout(() => {
+        document.body.classList.remove("error");
+      }, 500);
+      document.getElementById(inputId).value = "";
+    }
+
     function submitCodes() {
       const msg = document.getElementById("message");
       msg.textContent = "";
 
       for (let i = 1; i <= 4; i++) {
-        const input = document.getElementById("code" + i).value.trim();
-        if (input && codes[input] && !usedCodes.includes(input)) {
+        const inputId = "code" + i;
+        const input = document.getElementById(inputId).value.trim();
+        if (input && codes[input] && input.startsWith(i.toString()) && !usedCodes.includes(input)) {
           unlockedLetters = [...new Set(unlockedLetters.concat(codes[input]))];
           usedCodes.push(input);
           msg.textContent = "Code " + i + " accepted!";
           renderPhrase(true);
         } else if (input && usedCodes.includes(input)) {
           msg.textContent = "Code " + i + " already used.";
-        } else if (input && !codes[input]) {
-          msg.textContent = "Invalid code in slot " + i + ".";
+        } else if (input) {
+          msg.textContent = "";
+          triggerError(inputId);
         }
       }
     }

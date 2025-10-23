@@ -56,6 +56,10 @@
       max-width: 95%;
       word-wrap: break-word;
       white-space: pre-line;
+      transition: text-shadow 0.5s;
+    }
+    #phrase.glow {
+      text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00;
     }
     .codes {
       display: flex;
@@ -103,7 +107,6 @@
       font-size: 1rem;
       color: #ff6666;
     }
-    /* Responsive text */
     @media (max-width: 600px) {
       h1 { font-size: 1.5rem; }
       #phrase { font-size: 1.3rem; }
@@ -198,13 +201,14 @@
     // --- Game Logic ---
     const phrase = "WELCOME TO THE DESERT OF THE REAL";
 
-    // 2 letters per code, codes start with slot number
+    // Codes now contain 2 lowercase letters each
     const codes = {
-      "10010110": ["W","O"], // Code 1
-      "20011100": ["T","A"], // Code 2
-      "30101001": ["D","R"], // Code 3
-      "40110111": ["S","E"]  // Code 4
+      "1b001a0110": ["W","O"], // Code 1
+      "2x101e0011": ["T","A"], // Code 2
+      "3q111z0101": ["D","R"], // Code 3
+      "4m100n1110": ["S","E"]  // Code 4
     };
+
     let unlockedLetters = [];
     let usedCodes = [];
 
@@ -222,13 +226,23 @@
       const phraseDiv = document.getElementById("phrase");
 
       if (animated) {
-        phraseDiv.textContent = "";
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&";
+        let scramble = display.split("");
         let i = 0;
         const interval = setInterval(() => {
-          phraseDiv.textContent = display.substring(0, i) + "_".repeat(display.length - i);
+          scramble = scramble.map((c, idx) => {
+            if (display[idx] !== "_" && idx <= i) return display[idx];
+            return chars.charAt(Math.floor(Math.random() * chars.length));
+          });
+          phraseDiv.textContent = scramble.join("");
           i++;
-          if (i > display.length) clearInterval(interval);
-        }, 25);
+          if (i > display.length) {
+            clearInterval(interval);
+            phraseDiv.textContent = display;
+            phraseDiv.classList.add("glow");
+            setTimeout(() => phraseDiv.classList.remove("glow"), 600);
+          }
+        }, 30);
       } else {
         phraseDiv.textContent = display;
       }
@@ -257,7 +271,6 @@
         } else if (input && usedCodes.includes(input)) {
           msg.textContent = "Code " + i + " already used.";
         } else if (input) {
-          msg.textContent = "";
           triggerError(inputId);
         }
       }
@@ -274,3 +287,4 @@
   </script>
 </body>
 </html>
+

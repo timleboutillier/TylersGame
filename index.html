@@ -5,15 +5,28 @@
   <title>Matrix Phrase Game</title>
   <style>
     body {
-      background-color: black;
+      margin: 0;
+      padding: 0;
+      background: black;
       color: #00ff00;
       font-family: monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
+      overflow: hidden;
+    }
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    #intro, #game {
+      display: none;
+      text-align: center;
       padding-top: 50px;
+    }
+    #intro.active, #game.active {
+      display: block;
     }
     h1 {
       margin-bottom: 20px;
@@ -21,21 +34,35 @@
     #phrase {
       font-size: 2rem;
       letter-spacing: 0.2rem;
-      margin: 20px;
+      margin: 20px auto;
       text-align: center;
       max-width: 90%;
       word-wrap: break-word;
+      white-space: pre-line;
     }
-    input {
+    .codes {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .code-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .code-slot input {
       margin: 5px;
       padding: 10px;
       font-size: 1rem;
       border: 1px solid #00ff00;
       background: black;
       color: #00ff00;
+      width: 140px;
+      text-align: center;
     }
     button {
-      margin: 10px;
+      margin: 20px;
       padding: 10px 20px;
       font-size: 1rem;
       background: #00ff00;
@@ -54,33 +81,100 @@
   </style>
 </head>
 <body>
-  <h1>Matrix Phrase Challenge</h1>
-  <div id="phrase">_______ __ ___ ______ __ ___ ____</div>
-  
-  <div>
-    <input type="text" id="codeInput" placeholder="Enter code (e.g. 100110101)">
-    <button onclick="submitCode()">Submit</button>
-  </div>
-  
-  <div id="message"></div>
-  
-  <script>
-    // Target phrase
-    const phrase = "WELCOME TO THE DESERT OF THE REAL".toUpperCase();
+  <canvas id="matrixCanvas"></canvas>
 
-    // Codes mapped to letter sets
+  <!-- Intro Screen -->
+  <div id="intro" class="active">
+    <h1>Matrix Phrase Challenge</h1>
+    <p>
+      You are entering the Matrix.<br><br>
+      Every cocktail (Red or Blue Pill) you consume<br>
+      earns you a binary code.<br><br>
+      There are 4 unique codes.<br>
+      Enter them to reveal the hidden phrase.<br><br>
+      With 1 code, it’s nearly impossible.<br>
+      With 2 codes, still very difficult.<br>
+      With 3 codes, a sharp mind may crack it.<br>
+      With 4 codes, you stand a chance.<br><br>
+      Trade codes. Decode the truth.
+    </p>
+    <button onclick="startGame()">Enter the Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game">
+    <h1>Decode the Phrase</h1>
+    <div id="phrase">_______ __ ___ ______ __ ___ ____</div>
+    
+    <div class="codes">
+      <div class="code-slot">
+        <label>Code 1</label>
+        <input type="text" id="code1" placeholder="Enter code">
+      </div>
+      <div class="code-slot">
+        <label>Code 2</label>
+        <input type="text" id="code2" placeholder="Enter code">
+      </div>
+      <div class="code-slot">
+        <label>Code 3</label>
+        <input type="text" id="code3" placeholder="Enter code">
+      </div>
+      <div class="code-slot">
+        <label>Code 4</label>
+        <input type="text" id="code4" placeholder="Enter code">
+      </div>
+    </div>
+    
+    <button onclick="submitCodes()">Submit Codes</button>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // --- Falling Matrix Effect ---
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*";
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let x = 0; x < columns; x++) {
+      drops[x] = 1;
+    }
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0F0";
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 33);
+
+    // --- Game Logic ---
+    const phrase = "WELCOME TO THE DESERT OF THE REAL";
     const codes = {
       "100110101": ["W","O"], // Code 1
       "101001011": ["T","A"], // Code 2
       "111000111": ["D","R"], // Code 3
       "110011001": ["S","E"]  // Code 4
     };
-
     let unlockedLetters = [];
     let usedCodes = [];
 
-    // Render masked phrase
-    function renderPhrase() {
+    function renderPhrase(animated=false) {
       let display = "";
       for (let char of phrase) {
         if (char === " ") {
@@ -91,32 +185,47 @@
           display += "_";
         }
       }
-      document.getElementById("phrase").textContent = display;
+      const phraseDiv = document.getElementById("phrase");
+
+      if (animated) {
+        phraseDiv.textContent = "";
+        let i = 0;
+        const interval = setInterval(() => {
+          phraseDiv.textContent = display.substring(0, i) + "_".repeat(display.length - i);
+          i++;
+          if (i > display.length) clearInterval(interval);
+        }, 30);
+      } else {
+        phraseDiv.textContent = display;
+      }
     }
 
-    // Handle code submission
-    function submitCode() {
-      const input = document.getElementById("codeInput").value.trim();
+    function submitCodes() {
       const msg = document.getElementById("message");
+      msg.textContent = "";
 
-      if (!codes[input]) {
-        msg.textContent = "Invalid code. Try again.";
-        return;
+      for (let i = 1; i <= 4; i++) {
+        const input = document.getElementById("code" + i).value.trim();
+        if (input && codes[input] && !usedCodes.includes(input)) {
+          unlockedLetters = [...new Set(unlockedLetters.concat(codes[input]))];
+          usedCodes.push(input);
+          msg.textContent = "Code " + i + " accepted!";
+          renderPhrase(true);
+        } else if (input && usedCodes.includes(input)) {
+          msg.textContent = "Code " + i + " already used.";
+        } else if (input && !codes[input]) {
+          msg.textContent = "Invalid code in slot " + i + ".";
+        }
       }
-
-      if (usedCodes.includes(input)) {
-        msg.textContent = "You already used this code.";
-        return;
-      }
-
-      unlockedLetters = [...new Set(unlockedLetters.concat(codes[input]))];
-      usedCodes.push(input);
-      msg.textContent = "Code accepted!";
-      renderPhrase();
-      document.getElementById("codeInput").value = "";
     }
 
-    // Initialize display
+    function startGame() {
+      document.getElementById("intro").classList.remove("active");
+      document.getElementById("game").classList.add("active");
+      renderPhrase();
+    }
+
+    // Init phrase
     renderPhrase();
   </script>
 </body>
